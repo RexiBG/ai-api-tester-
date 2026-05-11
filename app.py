@@ -50,7 +50,7 @@ if st.button("Тествай") and key:
                 if r.status_code == 200:
                     candidates = data.get("candidates") or []
                     parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
-                    ans = "\n".join(part.get("text", "") for part in parts if part.get("text")).strip() or None
+                    ans = "\n".join(part.get("text", "") for part in parts).strip() or None
                 else:
                     ans = None
                     error_detail = (data.get("error") or {}).get("message")
@@ -62,8 +62,12 @@ if st.button("Тествай") and key:
                     timeout=30
                 )
                 data = r.json()
-                ans = data["choices"][0]["message"]["content"] if r.status_code == 200 else None
-                if r.status_code != 200:
+                if r.status_code == 200:
+                    choices = data.get("choices") or []
+                    ans = ((choices[0].get("message") or {}).get("content") or "").strip() if choices else None
+                    ans = ans or None
+                else:
+                    ans = None
                     error_detail = (data.get("error") or {}).get("message")
             
             if ans:
