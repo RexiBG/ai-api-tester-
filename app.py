@@ -49,7 +49,7 @@ if st.button("Тествай") and key:
                 data = r.json()
                 if r.status_code == 200:
                     candidates = data.get("candidates") or []
-                    parts = (candidates[0].get("content") or {}).get("parts") if candidates else []
+                    parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
                     ans = "\n".join(part.get("text", "") for part in parts if part.get("text")).strip() or None
                 else:
                     ans = None
