@@ -65,7 +65,6 @@ if st.button("Тествай") and key:
                 if r.status_code == 200:
                     choices = data.get("choices") or []
                     ans = ((choices[0].get("message") or {}).get("content") or "").strip() if choices else None
-                    ans = ans or None
                 else:
                     ans = None
                     error_detail = (data.get("error") or {}).get("message")
