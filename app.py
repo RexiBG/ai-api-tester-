@@ -43,7 +43,7 @@ if st.button("Тествай") and key:
                 r = requests.post(
                     p["url"],
                     headers={"Content-Type": "application/json", "x-goog-api-key": key},
-                    json={"contents": [{"role": "user", "parts": [{"text": "Здравей"}]}]},
+                    json={"contents": [{"parts": [{"text": "Здравей"}]}]},
                     timeout=30
                 )
                 data = r.json()
