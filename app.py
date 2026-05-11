@@ -38,10 +38,22 @@ if st.button("Тествай") and key:
     with st.spinner("Тествам..."):
         start = time.time()
         try:
+            error_detail = None
             if name == "Google Gemini":
-                url = f"{p['url']}?key={key}"
-                r = requests.post(url, json={"contents": [{"parts": [{"text": "Здравей"}]}]}, timeout=30)
-                ans = r.json()["candidates"][0]["content"]["parts"][0]["text"] if r.status_code == 200 else None
+                r = requests.post(
+                    p["url"],
+                    headers={"Content-Type": "application/json", "x-goog-api-key": key},
+                    json={"contents": [{"role": "user", "parts": [{"text": "Здравей"}]}]},
+                    timeout=30
+                )
+                data = r.json()
+                if r.status_code == 200:
+                    candidates = data.get("candidates") or []
+                    parts = (candidates[0].get("content") or {}).get("parts") if candidates else []
+                    ans = "\n".join(part.get("text", "") for part in parts if part.get("text")).strip() or None
+                else:
+                    ans = None
+                    error_detail = (data.get("error") or {}).get("message")
             else:
                 r = requests.post(
                     p["url"],
@@ -49,12 +61,16 @@ if st.button("Тествай") and key:
                     json={"model": p["model"], "messages": [{"role": "user", "content": "Здравей"}]},
                     timeout=30
                 )
-                ans = r.json()["choices"][0]["message"]["content"] if r.status_code == 200 else None
+                data = r.json()
+                ans = data["choices"][0]["message"]["content"] if r.status_code == 200 else None
+                if r.status_code != 200:
+                    error_detail = (data.get("error") or {}).get("message")
             
             if ans:
                 st.success(f"Работи! ({time.time()-start:.1f}s)")
                 st.write(ans)
             else:
-                st.error(f"Грешка: {r.status_code}")
+                details = f" - {error_detail}" if error_detail else ""
+                st.error(f"Грешка: {r.status_code}{details}")
         except Exception as e:
             st.error(f"Грешка: {e}")
